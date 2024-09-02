@@ -1,0 +1,227 @@
+///$tab GetFieldValue
+SUB Qvc.GetFieldValues (_retvar, _field, _vTable)
+/**
+@source Qvc_Utility.qvs
+Get min & max values for a Field. The values are set in compound variables names using parameter 1 as the prefix. For example, if parameter 1 is 'vStat', the set variables will be:
+
+	vStat.Min  =  the Min value of the field.
+	vStat.Max  =  the Max value of the field.
+    
+@syntax CALL Qvc.GetFieldValues('vStats', 'LastUpdate', ['Transactions.qvd']);
+
+@param 1 String. Variable stem name in which to return values. Variables created will stem.Max, stem.Min.
+@param 2 String. The field name.
+@param 3 String, Optional. Source that contains the field. If Source ends with '.qvd', source is assumed to be a QVD. If not, Source is a RESIDENT table. If omitted, all values of field are the source.
+*/
+UNQUALIFY "_qvctemp.*";	// UNQUALIFY all qvctemp fields
+
+IF len('$(_vTable)')=0 THEN
+	SET _vSource = ";LOAD FieldValue('$(_field)', recno()) as [$(_field)] AUTOGENERATE FieldValueCount('$(_field)')";
+ELSEIF index('$(_vTable)', '.') = 0 THEN
+	SET _vSource = 'RESIDENT [$(_vTable)]';
+ELSEIF '.qvd' = lower(right('$(_vTable)', 4)) THEN
+	SET _vSource = 'FROM [$(_vTable)] (qvd)';
+ELSE 
+	SET _vSource = 'FROM [$(_vTable)]';	// Assume text file
+ENDIF
+
+_qvctemp.temptab:
+LOAD 
+	// +0 is to fix a bug in V10 where max is getting truncated to 9 digits precision.
+	max([$(_field)])+0 as _qvctemp.maxval,
+	min([$(_field)])+0 as _qvctemp.minval	
+$(_vSource);
+// Replace of European DecimalSep ',' is required to assure returned value is proper decimal number, not formatted string
+LET $(_retvar).Max = replace(peek('_qvctemp.maxval'), ',', '.');
+LET $(_retvar).Min = replace(peek('_qvctemp.minval'), ',', '.');
+DROP table _qvctemp.temptab;
+
+SET _vSource=;
+END SUB
+///$tab FileExists
+/** 
+@Function Qvc.FileExists
+@source Qvc_Utility.qvs
+Returns true if a file exists. This function may only be used in script.
+
+@syntax LET vExists = $(Qvc.FileExists('dir\filename.ext'));
+
+@param 1 The relative or absolute file path as string.
+*/
+SET Qvc.FileExists = if(len(FileSize($1)) > 0, -1, 0);
+/*
+@EndFunction
+*/
+///$tab DefaultIfEmpty
+/** 
+@Function _Qvc.DefaultIfEmpty
+@source Qvc_Utility.qvs
+Returns a default value if paramter not supplied
+
+@syntax LET _param = $(_Qvc.DefaultIfEmpty('_param', 'String default'));
+
+@param 1 The parameter.
+@param 2 The value to be assigned if param 1 is empty.
+*/
+SET _Qvc.DefaultIfEmpty = if(len('$1')= 0,'$2', '$1');
+/*
+@EndFunction
+*/
+///$tab UniqueId
+SET _Qvc.UniqueId.v.Counter=0;
+SUB _Qvc.UniqueId (_retvar)
+/**
+@source Qvc_Utility.qvs
+Returns a unique identifier on each call.
+@syntax CALL _Qvc.UniqueId ('returnVariable');
+@param 1 Variable in which to return new unique identifier, quoted.
+*/
+	LET _Qvc.UniqueId.v.Counter = $(_Qvc.UniqueId.v.Counter) + 1;
+	LET $(_retvar) = 'UID' & num($(_Qvc.UniqueId.v.Counter), '00000000');
+END SUB
+
+///$tab FieldContains
+/** 
+@Function Qvc.FieldContains
+@source Qvc_Utility.qvs
+Search a field for the specified value. Returns true if a the value is found in the possible values.
+
+@syntax LET vContains = $(Qvc.FieldContains(Field, searchValue));
+
+@param 1 Field to be searched. No quotes.
+@param 2 Value to be searched for. String values must be enclosed in single quotes. If no quotes, the searchValue will be evaluated. 1+1 is the same as searching for '2'.
+*/
+SET Qvc.FieldContains = sum(if($1=$2,1))>0;
+/*
+@EndFunction
+*/
+
+///$tab TableExists
+/** 
+@Function _Qvc.TableExists
+@source Qvc_Utility.qvs
+Returns true if a table exists in the current script.
+
+@syntax LET vTableExists = $(_Qvc.TableExists(tablename));
+
+@param 1 Tablename, no quotes.
+*/
+SET _Qvc.TableExists = len(NoOfRows('$1'))>0;
+/*
+@EndFunction
+*/
+
+///$tab DateDiff
+/**
+@Function Qvc.DateDiff
+@source Qvc_Utility.qvs
+Calculates the number of the past interval between the 2 passed dates. For example, if week is requested the function calculates the number of weeks between the 2 passed dates. Supports years, quarters, months, weeks, days, hours, minutes and seconds. Accepts both dates and timestamps for the dates passed.
+
+It is important that the earlier of the passed dates is in param 2 and the later in param 3. This may be improved in the future.
+@syntax LET vDateDiff = $(Qvc.DateDiff('DatDiffType', StartDate, EndDate));
+@param 1 String. A string defining which mode should be applied to the date diff. Possible values are 'year', 'quarter', 'month', 'week', 'day', 'hour', 'minute' and 'second'. Defaults is 'day'.
+@param 2 The earlier of the 2 dates to compare.
+@param 3 The later of the 2 dates to compare.
+*/
+SET Qvc.DateDiff = if(lower($1)='year', year($3) - year($2)
+,if(lower($1)='quarter', ((year($3)*4) + ceil(month($3)/3)) - ((year($2)*4) + ceil(month($2)/3))
+,if(lower($1)='month', ((year($3)*12) + month($3)) - ((year($2)*12) + month($2))
+,if(lower($1)='week', floor((($3 - $2)/7))
+,if(lower($1)='day', floor($3 - $2)
+,if(lower($1)='hour', floor(($3 - $2)*24)
+,if(lower($1)='minute', floor(($3 - $2)*1440)
+,if(lower($1)='second', floor(($3 - $2)*86400)
+, floor($3 - $2) 	// Default to day
+))))))));
+/*
+@EndFunction
+*/
+
+///$tab NVL
+/**
+@Function Qvc.NVL
+@source Qvc_Utility.qvs
+Equivalent to the SQL NVL function. Checks to see if the first parameter is Null and if it is it returns the second parameter.
+
+@syntax LET vNVL = $(Qvc.NVL(TestVariable, 'DefaultValue')); 
+@param 1 A value to be tested against Null
+@param 2 The value to be returned if param 1 is equal to Null
+*/
+SET Qvc.NVL = if(isnull($1), $2, $1);
+/*
+@EndFunction
+*/
+
+///$tab Days360
+/**
+@Function Qvc.Days360
+@source Qvc_Utility.qvs
+Equivalent to MS Excel function days360(). Returns the number of days between two dates based on a 360-day year (twelve 30-day months), 
+which is used in some accounting calculations. 
+
+@syntax LET vDays360 = $(Qvc.Days360(StartDate, EndDate, 'DiffMode'));
+@param 1 The earlier of the 2 dates to compare
+@param 2 The later of the 2 dates to compare
+@param 3 The calculation mode. Possible values are US and Europe. Default is US. Do not quote the value. 
+*/
+SET Qvc.Days360 = (((year($2)*12 + month($2)) - (year($1)*12 + month($1))) * 30) 
++ if(upper('$3')='EUROPE', numMin(day($2),30) - numMin(day($1),30)
+, day($2) - day($1));
+/*
+@EndFunction
+*/
+
+///$tab InRange
+/**
+@Function Qvc.InRange
+@source Qvc_Utility.qvs
+Equivalent to MS Excel function inrange(). Returns whether the past value is between the start and end values passed for the range. Returns true or false. Can be used for any numeric data including dates. It does not matter if the start of the range is a larger or smaller value than the end. 
+
+@syntax LET vInRange = $(Qvc.InRange(FirstValue, SecondValue, CompareValue));
+@param 1 The first of the 2 dates to compare
+@param 2 The second of the 2 dates to compare
+@param 3 The value to compare against the range 
+*/
+SET Qvc.InRange = if($1<$2, if($3>=$1 AND $3<=$2, -1, 0), if($3>=$2 AND $3<=$1, -1, 0));
+/*
+@EndFunction
+*/
+
+///$tab QvdFieldNumber
+SUB Qvc.QvdFieldNumber (_qvctemp.fieldname, _qvctemp.qvdname, _qvctemp.retvar)
+/**
+@source Qvc_Utility.qvs
+Returns the number of a specified field within a QVD. If the field is not found, 0 is returned. This is the QVD form of the native "FieldNumber()" function.
+
+The optional third parameter is a variable name used to return the result. If omitted, the default of "Qvc.v.Return" will be used. 
+    
+@syntax CALL Qvc.QvdFieldNumber('Last Payment', '..\QVD\myfile.qvd', ['vReturn']);
+
+@param 1 String. The FieldName to be searched for. 
+@param 2 String. The QVD name, including path.
+@param 3 String, Optional. Variable in which to return result. If omitted, the default is "Qvc.v.Return"
+*/
+UNQUALIFY "_qvctemp.*";	// UNQUALIFY all qvctemp fields
+
+IF len('$(_qvctemp.retvar)')=0 THEN
+	SET _qvctemp.retvar = 'Qvc.v.Return'; 
+ENDIF
+// Using "0" as not found is consistent with the FieldNumber() function. 
+SET $(_qvctemp.retvar) = 0;	// Default return value is "not found"
+
+// If the QVD does not exist, exit with 0. This is consistent with table-not-found condition in FieldNumber().
+IF NOT $(Qvc.FileExists('$(_qvctemp.qvdname)')) THEN
+	SET $(_qvctemp.retvar) = 0;	
+	EXIT Sub
+ENDIF		
+
+// Note: QvdFieldName() function is one based, even though the doc says it's zero based. 
+FOR _qvctemp.idx = 1 to QvdNoOfFields('$(_qvctemp.qvdname)') //-1
+	IF QvdFieldName('$(_qvctemp.qvdname)', $(_qvctemp.idx)) = '$(_qvctemp.fieldname)' THEN; 
+		LET $(_qvctemp.retvar) = $(_qvctemp.idx); //+1;
+	ENDIF
+	EXIT FOR WHEN $(_qvctemp.retvar);	// Exit loop when field is found
+NEXT _qvctemp.idx
+SET _qvctemp.idx=;		// Delete temp variable
+
+END SUB

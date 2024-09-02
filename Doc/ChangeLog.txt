@@ -1,0 +1,181 @@
+Version 11.3 
+- This release is a rollup of bug fixes and compatabilty updates for QV12. 
+- New routine, Qvc.DropTable. Credit to Stanislav Chernov.
+- Russian language corrections and various other fixes from Stanislav Chernov.
+- Qvc.Calender correction to future date variable from walteryiphk.
+- Qvc.DbExtract updated for syntax compatability with QV12.
+
+Version 11.2
+- Fixed issue 62, Qvc.IncrementalSetup script error when QVD not exists in QV12.10.
+- Added new routine, Qvc.ExportTables.
+- Removed variable Qvc.Global.v.QlikProduct as there is no reliable way to detect product during script execution. 
+- Added "QVC Developer Mode On" button on Detail sheet to expose QVC developer objects. Note this is only meaningful to developers working on updating the source version of QVC.
+- Qvc.Calendar: Future dates (later than load date) are excluded from "to date" (such as YTD) set variables. 
+- Fixed issue 61. Add option to Qvc.Icons to not Capitalize Icon filenames.
+- Fixed issue 58. Qvc.GetFieldValues error when tablename contains spaces.
+- Fixed issue 56. Qvc.Icons do not set custom field name. 
+- Fixed issue 59. Error in Qvc_Incremental_Reload if 2nd parameter contains "." (dot).
+
+Version 11.1
+- Fixed issue 55 "vSetYTD not working as before".
+- Corrected "Date Range" chart in Qvc.CalendarFromField example file.
+
+Version 11
+-	It is now possible to include the QVC Runtime directly from the github repository using http. Use the following script statement on a single line (ignore the line wrapping in this doc): 
+
+$(Must_Include=http://raw.githubusercontent.com/RobWunderlich/Qlikview-Components/master/Qvc_Runtime/Qvc.qvs); 
+
+For language files:
+
+$(Must_Include=http://raw.githubusercontent.com/RobWunderlich/Qlikview-Components/master/Qvc_Runtime/language/Qvc_Language_ES.qvs); 
+
+
+-	New routines Qvc.ExportModel and Qvc.ImportModel.
+Qvc.ExportModel is used to export all current tables to a single QVD file. Qvc.ImportModel is used to re-import that QVD into a data model of multiple tables.
+
+-	Additions to Qvc.Calendar and Qvc.CalendarFromField (Credit Mark Miller)
+	Qvc.CalendarFromField has a new input variable: Qvc.Calendar.v.SparseDates. If set to true, dates missing from the input filed will not be populated in the Calendar table.
+	New Calendar Set Analysis variables:
+	vSetPreviousFULLMonth  - the previous Full month. Not month-to-date
+	vSetPreviousFULLMonthN – the month ago, specified by a parameter number.
+	vSetRollingN – variable number of rolling months, specified by a parmeter.
+
+-	Fixed Issue 52 , Issue 54, Issue 51. Qlik Sense V3. “QVC include fails if SET Qvc.Global.Extension.Directory is predefined”
+
+-	Fixed  Issue 50, “Issue with Qvc.LinkTable”
+
+-	Fixed Issue 47 “QVC DBExtract: parameter UpdateFieldType is not actually used anywhere in the code”
+
+-	Fixed Issue 43. Qvc.DbExtract, Tolerate lowercase for UniqueKey switch.
+
+-	Fixed Issue 41. “DbExtract doesn't clean up all its variables”.
+
+-	Fixed Issue 37. “Qvc_ExpandInterval Step Interval Parameter”.  Qvc.ExpandInterval has an added parameter: 
+o	param 5 String. Optional. The value to be used to step the interval. One of 'DAY', 'HOUR', 'MINUTE', 'SECOND'.
+
+-	Fixed Issue 35, Calendar Code Extension not working in Sense.
+
+-	Fixed Issue 27. Qvc.IncrementalStore throws error when table name contains spaces. 
+
+-	Fixed Issue 51, Issue 54, Residual temp variables causing errors in Qlik Sense reload. 
+
+
+Version 10.2
+- Closed Issue 25, Added a “Year-Quarter” field to Qvc.Calendar and Qvc.CalendarFromField.
+- Closed Issue 35, Calendar Code Extension not working in Sense. 
+- Added Romanian (RO) Language file. (Credit to Cotiso Hanganu)
+- Started adding Qlik Sense examples. 
+
+
+Version 10.1
+- Closed issue 23. Non-English characters not supported in log file. (Thanks to Alkopfer)
+- Qvc.Log -- New variable Qvc.Log.v.WriteToQvLog, indicated if the logging should also be written to the QlikView/Sense application log file and script progress window.
+- Closed issue 24. Qvc.IncrementalSetup failing when QVD exists but is empty. (Thanks for Luca Jonathan Panetta)
+- Qvc.SegmentedStore -- New segment type of 'day' added to create daily QVDs.
+
+
+Version 10
+- QVC Documentation and Examples are Personal Edition enabled. 
+- Merged QVACB library with QVC.
+- Migrated Sub from QVACB, Qvc.Icons. Bundle loads image files into a QVW.
+- Migrated sub from QVACB, Qvc.QvdEmpty. Empties data from a QVD.
+- Migrated sub from QVACB, Qvc.SegmentedStore. STOREs table into segmented QVDs by date range.
+- Migrated function from QVACB, Qvc.DateDiff.
+- Migrated function from QVACB, Qvc.Days360.
+- Migrated function from QVACB, Qvc.NVL.
+- Migrated function from QVACB, Qvc.InRange.
+- Closed Issue 12. Qvc.ExpandInterval script error when field name contains comma.
+- Closed Issue 5. Qvc.DbExtract Initial extraction proceeds even when KeyField has typo in it.
+- Closed Issue 4. Qvc. DbExtract Provide table specific BaseValue.
+
+
+Version 9.1
+- Issue 8. Qvc.LinkTable may delete rows from source table.
+- Issue 10. Qvc.Loader.v.KeyFieldIsUnique fails if keyfield exist in more than one table.
+- Issue 11. Include of qvc.qvs causes script error in Qlik Sense.
+
+Version 9
+- QVC moved from google code to GitHub https://github.com/RobWunderlich/Qlikview-Components.
+- New Sub, Qvc.ColorTheme.
+- Issue 6.  Typo in documentation for Qvc.IncrementalStore.
+- New Sub, Qvc.AsOfTable. Closes issue 2. 
+
+Version 8.2
+- Issue 44. Script error in Qvc.DbExtract if using StaleAfter test and regional settings that use something other than "." for decimal separator.
+- Issue 46. Negative start month param in Qvc.Calendar generates incorrect _QuarterSerial values.
+
+Version 8.1
+- Issue 38. Add support for Deletes to Qvc.DbExtract.
+- Issue 39. Qvc.Calendar vSetXXX variables incorrect when script uses "Verbatim=1".
+- Updated Qvc.DbExtract to allow any LOAD statement instead of Column specification. 
+
+Version 8
+- Qvc.IncrementalSetup -- new variable, Qvc.Loader.v.StoreMaxModFieldValue, indicates max ModField value should be stored in the QVD. This greatly speeds up the incremental reload process for large QVD files.
+- Qvc.Calendar-- added code extension point for SET variables. 
+- Added new Sub, Qvc.QvdFieldNumber. This sub provides the same functionality as the native QV “FieldNumber” function, but for QVD files.
+- Removed duplicate Qvc.Calendar & Qvc.CalendarFromField code from qvc.qvs. The duplicates caused no functional problem, but did make qvc.qvs larger than necessary.
+
+Version 7
+- Added new Sub, Qvc.ExpandRange. Provides for expanding an interval table into discreet rows.
+- Qvc.InspectTable. Added variable Qvc.v.QvdViewer.Path to optionaly specify the location of the QViewer program.
+- Issue 34. Qvc.Calendar. Selections in non-calendar fields should not impact period date ranges.
+- Documentation corrections.
+- Issue 35. Qvc.Log--  Qvc.Log.v.LogFileName incorrectly spelled as Qvc.Log.v.LogFile when searching for existing external log.
+
+Version 6.1
+- Added new Sub, Qvc.InspectTable.
+- Issue 30. Qvc.Calendar. Quarters incorrect when quarter months cross a year. For example, when first month of year is 11.
+
+Version 6
+- Added new Sub, Qvc.DbExtract. Provides for table driven SQL extract of multiple tables.
+- Issue 29. Qvc.PopulateVariables. Add [] around variable names to allow for special characters and spaces.
+- Issue 28. Qvc.ListFiles. Default filemask missing.
+- Issue 27. Qvc.LogWarning. Documentation correction.
+- Issue 26.	Allow additional set modifiers to be combined with Calendar vSet variables.
+- Issue 25. Qvc.AvailableUpdate. Documentation correction.
+
+Version 5.1
+- Issue 24. Qvc.CreateWildMatchExpression may produce incorrect results when repeated target value.
+
+Version 5
+- Added new Sub, Qvc.DataLineage. 
+- Fixed Issue 22, sample CalendarExtFields.qvs should use WeekYear() instead of Year().
+- Issue 23. Removed min/max reporting message from Qvc.IncrementalStore. Finding the values added significant runtime to large tables. 
+
+Version 4.1
+- Fix Issue 21, Qvc.GetFieldValues returns incorrect values for European users. Fixes problem when DecimalSep other than '.' (dot) is used.
+
+Version 4
+- New Code Extension facility for adding fields to the Calendar.
+- Restyling of this Documentation.qvw.
+- Qvc.IncrementalSetup, added new database value "Qvc.Loader.v.Database=SFDC" for loading from SalesForce (Issue 17).
+- Qvc.TableStats, using ThousandSep variable to format numbers (Issue 18).
+- Removed Tab indicators from Qvc.qvs to allow qvc to be inserted (instead of included) in a qvw.
+
+Version 3
+- New sub Qvc.ListDirectories.
+- Fixed issue 14, script error in Qvc.UpdateQvd when space in keyfield name.
+- Added Indonesian (ID) language file.
+- Fixed issue 15, Qvc.GetFieldValues() returns numbers with max 9 digit precision on V9/V10.
+- Fixed issue 16, some components, e.g. Qvc.GetFieldValues(), fail if "QUALIFY *" in effect.
+- Added config variable Qvc.Loader.v.Database. Specifies the database product name. Possible values are SQLSERVER | ORACLE.
+- Support for Incremental Reloads using Oracle. 
+
+Version 2
+- Added config variable Qvc.Loader.v.KeyFieldIsUnique to support non-unique keys in Incremental Load and QVD updates. (Issue 10).
+- Added table filtering parm to Qvc.TableStats. (Issue 11).
+- Added Dutch (NL) language file.
+
+Version 1.1
+- Fixed issue 5. Qvc.LogWarning deleted variable. 
+- Incremental Reload -- added capability to force full reload.
+    * Added ForceFullReload parm to Qvc.IncrementalSetup. 
+    * Added ReplaceQvd parm to Qvc.UpdateQvd.
+- Fixed issue 8. Corrected variable names in language files.
+- Added etc/QvcSheetObjects.qvw. Example sheet objects for use with Qvc.
+- New Sub Qvc.JoinGenericTables rejoins separate tables created by Generic Load.
+- New Sub Qvc.QvcUpdateAvailable tests if newer version available for download.
+- IncrementalUpdate -- The "min=,max=" log message values will be formatted as timestamps only if using a Datetime modfield.
+
+Version 1.0
+- First production release.
